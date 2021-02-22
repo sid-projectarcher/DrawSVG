@@ -245,6 +245,12 @@ void HardwareRenderer::rasterize_point(float x, float y, Color color) {
   
   // Task 1: 
   // Implement point rasterization
+    glColor4f(color.r, color.g, color.b, color.a);
+
+    glBegin(GL_POINTS);
+    glVertex2f(x, y);
+    glEnd();
+    return;
 
 }
 
@@ -254,7 +260,19 @@ void HardwareRenderer::rasterize_line(float x0, float y0,
 
   // Task 1: 
   // Implement line rasterization
+    glColor4f(color.r, color.g, color.b, color.a);
 
+    //Lets you enable t h i c c lines
+    //glEnable(GL_LINE_WIDTH);
+    //GLfloat larger = 6.0f;
+    //glLineWidth(larger);
+
+    glBegin(GL_LINES);
+    glVertex2f(x0, y0);
+    glVertex2f(x1, y1);
+
+    glEnd();
+    return;
 }
 
 void HardwareRenderer::rasterize_triangle(float x0, float y0,
@@ -263,7 +281,14 @@ void HardwareRenderer::rasterize_triangle(float x0, float y0,
                                           Color color) {
   // Task 1: 
   // Implement triangle rasterization
+    glColor4f(color.r, color.g, color.b, color.a);
 
+    glBegin(GL_TRIANGLES);
+    glVertex2f(x0,y0);
+    glVertex2f(x1,y1);
+    glVertex2f(x2,y2);
+    glEnd();
+    return;
 }
 
 void HardwareRenderer::rasterize_image(float x0, float y0,

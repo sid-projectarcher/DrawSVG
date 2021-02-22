@@ -244,7 +244,72 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
 
   // Task 2: 
   // Implement line rasterization
+
+    int sx0 = (int)floor(x0);
+    int sy0 = (int)floor(y0);
+    int sx1 = (int)floor(x1);
+    int sy1 = (int)floor(y1);
+
+    //if vertical line
+    if (sx0 == sx1) {
+
+        for (int i = min(sy0, sy1); i <= max(sy0, sy1); i++) {
+            rasterize_point(sx0, i, color);
+        }
+
+        return;
+
+    }
+
+    float slope = (y1 - y0) / (x1 - x0);
+    int x_start, y_start;
+    float x, y;
+
+    if (-1 <= slope && slope <= 1) {
+
+        if (sx0 < sx1) {
+            x_start = sx0;
+            y_start = sy0;
+        }
+
+        else { //sx0 >= sx1
+            x_start = sx1;
+            y_start = sy1;
+        }
+
+        y = y_start == sy0 ? y0 : y1;
+
+        for (int i = x_start; i <= max(sx0, sx1); i++) {
+            rasterize_point(i, y, color);
+            y += slope;
+        }
+    }
+
+    else {
+        if (sy0 < sy1) {
+            x_start = sx0;
+            y_start = sy0;
+        }
+
+        else { //sy0 >= sy1
+            x_start = sx1;
+            y_start = sy1;
+        }
+
+        x = x_start == sx0 ? x0 : x1;
+
+        for (int i = y_start; i <= max(sy0, sy1); i++) {
+            rasterize_point(x, i, color);
+            x += (1 / slope);
+        }
+
+    }
 }
+
+float sign(Vector2D p1, Vector2D p2, Vector2D p3) {
+    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
 
 void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
                                               float x1, float y1,
@@ -252,7 +317,47 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
                                               Color color ) {
   // Task 3: 
   // Implement triangle rasterization
+  // Fill in the points that exist within the sdf of the triangle
 
+    
+    int sx0 = (int)floor(x0);
+    int sy0 = (int)floor(y0);
+    int sx1 = (int)floor(x1);
+    int sy1 = (int)floor(y1);
+    int sx2 = (int)floor(x2);
+    int sy2 = (int)floor(y2);
+
+    Vector2D p1 = Vector2D(sx0, sy0);
+    Vector2D p2 = Vector2D(sx1, sy1);
+    Vector2D p3 = Vector2D(sx2, sy2);
+    float d1, d2, d3;
+
+
+    float rate = (float)this->sample_rate;
+
+    float bottom = min(y0, min(y1, y2)) * rate;
+    float top = max(y0, max(y1, y2)) * rate;
+    float left = min(x0, min(x1, x2)) * rate;
+    float right = max(x0, max(x1, x2)) * rate;
+    
+    
+    
+    for (int x = floor(left); x <= right; x++) {
+        for (int y = bottom; y <= top; y++) {
+            Vector2D pt = Vector2D(x, y);
+            d1 = sign(pt, p1, p2);
+            d2 = sign(pt, p2, p3);
+            d3 = sign(pt, p3, p1);
+
+            bool has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+            bool has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+            if (!(has_neg && has_pos)) {
+                rasterize_point(x, y, color);
+            }
+
+        }
+    }
 }
 
 void SoftwareRendererImp::rasterize_image( float x0, float y0,
